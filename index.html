@@ -360,7 +360,7 @@
     border-radius: 50px;
     padding: 12px 24px;
     width: 100%;
-    max-width: 400px;
+    max-width: 480px;
   }
   .play-btn {
     width: 42px; height: 42px;
@@ -375,8 +375,42 @@
     transition: transform 0.15s;
   }
   .play-btn:hover { transform: scale(1.1); }
+  .stop-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .stop-btn:hover { background: rgba(255,255,255,0.25); }
   .audio-label { font-size: 14px; color: #A8B8D8; flex: 1; }
   .audio-note { font-size: 13px; color: var(--text-muted); font-style: italic; }
+  .audio-progress {
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    margin-top: 8px;
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+  }
+  .audio-progress-bar {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s linear;
+  }
+  .replay-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
 
   .writing-task { 
     background: #FFFDF5;
@@ -1140,6 +1174,12 @@ let totalTime = 0;
 let answered = false;
 let results = {correct:0, wrong:0, skipped:0, vocab:[], grammar:[], reading:[], listening:[], writing:[]};
 
+// Preload voices
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
 function startExam() {
   document.getElementById('intro-screen').style.display = 'none';
   const es = document.getElementById('exam-screen');
@@ -1175,10 +1215,12 @@ function renderQuestion() {
     wrap.className = 'audio-player-wrap';
     wrap.innerHTML = `
       <div class="audio-player-custom">
-        <button class="play-btn" onclick="toggleAudio(this)">▶</button>
-        <div class="audio-label" id="audio-label-${q.id}">Press play to listen</div>
+        <button class="play-btn" id="play-btn-${q.id}" onclick="toggleSpeech(${q.id})">▶</button>
+        <div class="audio-label" id="audio-label-${q.id}">Press ▶ to listen</div>
+        <button class="stop-btn" onclick="stopSpeech()" title="Stop">■</button>
       </div>
-      <div class="audio-note">🔊 Click ▶ to reveal the audio transcript for this exercise.</div>
+      <div class="audio-progress"><div class="audio-progress-bar" id="progress-bar-${q.id}"></div></div>
+      <div class="replay-note">🔊 You can listen multiple times. Read carefully — then answer the question below.</div>
     `;
     card.appendChild(wrap);
   }
@@ -1269,6 +1311,124 @@ function toggleAudio(btn) {
   }
 }
 
+// ═══════════════════════════════════════════════
+// WEB SPEECH API
+// ═══════════════════════════════════════════════
+let currentUtterance = null;
+let speechPlaying = false;
+let progressInterval = null;
+
+// Extract clean transcript text (remove the [Audio transcript] prefix and quotes)
+function getCleanAudio(q) {
+  return q.audio.replace('[Audio transcript] ', '').replace(/^"|"$/g, '');
+}
+
+function toggleSpeech(qId) {
+  const q = questions[currentQ];
+  const btn = document.getElementById(`play-btn-${qId}`);
+  const label = document.getElementById(`audio-label-${qId}`);
+  const bar = document.getElementById(`progress-bar-${qId}`);
+
+  if (!('speechSynthesis' in window)) {
+    label.textContent = '⚠ Your browser does not support audio playback.';
+    return;
+  }
+
+  if (speechPlaying) {
+    window.speechSynthesis.pause();
+    speechPlaying = false;
+    btn.textContent = '▶';
+    label.textContent = 'Paused — press ▶ to continue';
+    clearInterval(progressInterval);
+    return;
+  }
+
+  if (window.speechSynthesis.paused && currentUtterance) {
+    window.speechSynthesis.resume();
+    speechPlaying = true;
+    btn.textContent = '⏸';
+    label.textContent = 'Playing…';
+    startProgress(bar, currentUtterance);
+    return;
+  }
+
+  // Fresh play
+  window.speechSynthesis.cancel();
+  const text = getCleanAudio(q);
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-GB';
+  utter.rate = 0.88;
+  utter.pitch = 1.0;
+
+  // Try to pick a good English voice
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('female'))
+    || voices.find(v => v.lang === 'en-GB')
+    || voices.find(v => v.lang.startsWith('en'));
+  if (preferred) utter.voice = preferred;
+
+  currentUtterance = utter;
+
+  utter.onstart = () => {
+    speechPlaying = true;
+    btn.textContent = '⏸';
+    label.textContent = 'Playing…';
+    bar.style.width = '0%';
+    startProgress(bar, utter);
+  };
+
+  utter.onend = () => {
+    speechPlaying = false;
+    currentUtterance = null;
+    btn.textContent = '▶';
+    label.textContent = '✓ Finished — you can replay';
+    bar.style.width = '100%';
+    clearInterval(progressInterval);
+  };
+
+  utter.onerror = () => {
+    speechPlaying = false;
+    btn.textContent = '▶';
+    label.textContent = '⚠ Error — try again';
+    clearInterval(progressInterval);
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+
+function startProgress(bar, utter) {
+  clearInterval(progressInterval);
+  const text = utter.text || '';
+  // Estimate duration: ~120 words/min at rate 0.88 => ~105 words/min
+  const words = text.split(' ').length;
+  const estimatedMs = (words / 105) * 60000;
+  const start = Date.now();
+  progressInterval = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const pct = Math.min((elapsed / estimatedMs) * 100, 98);
+    bar.style.width = pct + '%';
+    if (pct >= 98) clearInterval(progressInterval);
+  }, 200);
+}
+
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+  speechPlaying = false;
+  currentUtterance = null;
+  clearInterval(progressInterval);
+  const q = questions[currentQ];
+  if (!q || q.type !== 'listening') return;
+  const btn = document.getElementById(`play-btn-${q.id}`);
+  const label = document.getElementById(`audio-label-${q.id}`);
+  const bar = document.getElementById(`progress-bar-${q.id}`);
+  if (btn) btn.textContent = '▶';
+  if (label) label.textContent = 'Stopped — press ▶ to listen again';
+  if (bar) bar.style.width = '0%';
+}
+
+// Stop speech when moving to next question
+const _origNext = nextQuestion;
+
 let selectedIdx = -1;
 function selectAnswer(idx, btn, q) {
   if (answered) return;
@@ -1314,6 +1474,7 @@ function trackSection(q, isCorrect) {
 }
 
 function nextQuestion(skipped) {
+  stopSpeech();
   if (skipped && !answered) {
     const q = questions[currentQ];
     if (q.type === 'writing') {
