@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English A2 Level Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F1B35;
+    --blue: #4A9EFF;
+    --blue-light: #7BBCFF;
+    --surface: #F7F9FC;
+    --surface2: #EEF2F8;
+    --text: #1A1A2E;
+    --text-muted: #6B7A99;
+    --correct: #22C55E;
+    --wrong: #EF4444;
+    --warn: #F59E0B;
+    --border: #D1DCF0;
+    --ring: #4A9EFF;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* INTRO SCREEN */
+  #intro-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .intro-badge {
+    background: var(--blue);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+  .intro-title {
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .intro-title span { color: var(--blue-light); }
+  .intro-subtitle {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    color: #A8B8D8;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    max-width: 520px;
+  }
+  .attention-box {
+    background: rgba(74,158,255,0.12);
+    border: 1px solid rgba(74,158,255,0.35);
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 48px;
+    text-align: left;
+    width: 100%;
+  }
+  .attention-box h3 {
+    color: var(--blue-light);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .attention-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .attention-box li {
+    color: #C8D8F0;
+    font-size: 15px;
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .attention-box li::before {
+    content: '→';
+    color: var(--blue);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .sections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 48px;
+  }
+  .section-pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: left;
+  }
+  .section-pill .s-num { color: var(--blue); font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .section-pill .s-name { color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .section-pill .s-count { color: var(--text-muted); font-size: 12px; }
+  .start-btn {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 56px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 8px 32px rgba(74,158,255,0.35);
+  }
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(74,158,255,0.45); }
+
+  /* EXAM SCREEN */
+  #exam-screen { display: none; width: 100%; min-height: 100vh; flex-direction: column; }
+
+  .exam-header {
+    background: var(--navy);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 64px;
+  }
+  .q-counter {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .q-counter span { color: var(--blue); }
+  .timer-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .timer-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #timer-bar {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 4px;
+    transition: width 0.9s linear, background 0.3s;
+  }
+  #timer-bar.warn { background: var(--warn); }
+  #timer-bar.danger { background: var(--wrong); }
+  #timer-display {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue-light);
+    text-align: right;
+  }
+  .section-label {
+    background: rgba(74,158,255,0.15);
+    color: var(--blue-light);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .exam-body {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+  }
+  .question-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 40px 48px;
+    max-width: 780px;
+    width: 100%;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+  }
+  .q-type-tag {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .q-prompt {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .q-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  .option-btn .opt-letter {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--blue);
+    background: #EBF4FF;
+    transform: translateX(4px);
+  }
+  .option-btn:hover:not(:disabled) .opt-letter {
+    background: var(--blue); border-color: var(--blue); color: #fff;
+  }
+  .option-btn.selected { border-color: var(--blue); background: #EBF4FF; }
+  .option-btn.selected .opt-letter { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .option-btn.correct { border-color: var(--correct); background: #F0FDF4; }
+  .option-btn.correct .opt-letter { background: var(--correct); border-color: var(--correct); color: #fff; }
+  .option-btn.wrong { border-color: var(--wrong); background: #FEF2F2; }
+  .option-btn.wrong .opt-letter { background: var(--wrong); border-color: var(--wrong); color: #fff; }
+  .option-btn:disabled { cursor: default; }
+
+  .text-input-wrap { display: flex; flex-direction: column; gap: 12px; }
+  .text-input {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--surface2);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  .text-input:focus { border-color: var(--blue); }
+  textarea.text-input { min-height: 120px; }
+
+  .reading-passage {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text);
+    background: #FFFEF8;
+    border-left: 4px solid var(--blue);
+    padding: 24px 28px;
+    border-radius: 0 12px 12px 0;
+  }
+
+  .feedback-box {
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback-box.correct { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; display: block; }
+  .feedback-box.wrong { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; display: block; }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    gap: 16px;
+  }
+  .nav-btn {
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .nav-btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .nav-btn.primary { background: var(--blue); box-shadow: 0 4px 20px rgba(74,158,255,0.35); }
+  .nav-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .audio-player-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .audio-player-custom {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 50px;
+    padding: 12px 24px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .play-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+  .play-btn:hover { transform: scale(1.1); }
+  .audio-label { font-size: 14px; color: #A8B8D8; flex: 1; }
+  .audio-note { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+  .writing-task { 
+    background: #FFFDF5;
+    border: 1px solid #FDE68A;
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .writing-task strong { color: #92400E; }
+
+  /* RESULTS */
+  #results-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 60px 20px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .result-ring {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: conic-gradient(var(--blue) 0%, transparent 0%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .result-ring::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: var(--navy);
+  }
+  .result-pct {
+    position: relative;
+    z-index: 1;
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .result-title { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 12px; text-align: center; }
+  .result-level { color: var(--blue-light); font-size: 18px; margin-bottom: 32px; font-family: 'Lora', serif; font-style: italic; }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 40px;
+  }
+  .result-cell {
+    background: rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .result-cell .val { font-size: 24px; font-weight: 700; color: #fff; }
+  .result-cell .lbl { font-size: 12px; color: #A8B8D8; margin-top: 4px; }
+  .restart-btn {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 48px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(74,158,255,0.35);
+    transition: transform 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .restart-btn:hover { transform: translateY(-2px); }
+
+  .highlight-word { 
+    background: rgba(74,158,255,0.2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  @media (max-width: 600px) {
+    .question-card { padding: 24px 20px; }
+    .sections-grid { grid-template-columns: 1fr; }
+    .result-grid { grid-template-columns: 1fr 1fr; }
+    .q-prompt { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro-screen">
+  <div class="intro-badge">Official Practice Exam</div>
+  <h1 class="intro-title">English Level Test<br><span>A2 Assessment</span></h1>
+  <p class="intro-subtitle">A complete 100-question examination covering vocabulary, grammar, reading comprehension, listening, and writing skills.</p>
+  
+  <div class="attention-box">
+    <h3>⚠ Before You Begin</h3>
+    <ul>
+      <li>Find a quiet place and eliminate all distractions.</li>
+      <li>Each section has a strict time limit per question — work quickly but carefully.</li>
+      <li>You cannot go back to previous questions.</li>
+      <li>Read every instruction before answering.</li>
+      <li>All questions and answers must be in English.</li>
+    </ul>
+  </div>
+
+  <div class="sections-grid">
+    <div class="section-pill">
+      <div class="s-num">Q 1–20</div>
+      <div class="s-name">Vocabulary</div>
+      <div class="s-count">Real or Fake word? • 10 sec each</div>
+    </div>
+    <div class="section-pill">
+      <div class="s-num">Q 21–45</div>
+      <div class="s-name">Grammar</div>
+      <div class="s-count">Choose or complete • 30 sec each</div>
+    </div>
+    <div class="section-pill">
+      <div class="s-num">Q 46–60</div>
+      <div class="s-name">Reading</div>
+      <div class="s-count">Short texts + comprehension • 95 sec</div>
+    </div>
+    <div class="section-pill">
+      <div class="s-num">Q 61–85</div>
+      <div class="s-name">Listening</div>
+      <div class="s-count">Audio transcripts • 60 sec each</div>
+    </div>
+    <div class="section-pill">
+      <div class="s-num">Q 86–95</div>
+      <div class="s-name">Reading+</div>
+      <div class="s-count">Longer passages • 2.5 min each</div>
+    </div>
+    <div class="section-pill">
+      <div class="s-num">Q 96–100</div>
+      <div class="s-name">Writing</div>
+      <div class="s-count">Formal & informal tasks</div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startExam()">Begin Examination</button>
+</div>
+
+<!-- EXAM -->
+<div id="exam-screen">
+  <div class="exam-header">
+    <div class="q-counter">Question <span id="q-num">1</span> / 100</div>
+    <div class="timer-wrap">
+      <div class="timer-bar-bg"><div id="timer-bar"></div></div>
+      <div id="timer-display">0:10</div>
+    </div>
+    <div class="section-label" id="section-label">Vocabulary</div>
+  </div>
+  <div class="exam-body">
+    <div class="question-card" id="question-card">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen">
+  <div class="result-ring" id="result-ring">
+    <div class="result-pct" id="result-pct">0%</div>
+  </div>
+  <div class="result-title" id="result-title">Test Complete!</div>
+  <div class="result-level" id="result-level">Your A2 Level Result</div>
+  <div class="result-grid">
+    <div class="result-cell"><div class="val" id="res-correct">0</div><div class="lbl">Correct</div></div>
+    <div class="result-cell"><div class="val" id="res-wrong">0</div><div class="lbl">Incorrect</div></div>
+    <div class="result-cell"><div class="val" id="res-skipped">0</div><div class="lbl">Timed Out</div></div>
+    <div class="result-cell"><div class="val" id="res-vocab">0%</div><div class="lbl">Vocabulary</div></div>
+    <div class="result-cell"><div class="val" id="res-grammar">0%</div><div class="lbl">Grammar</div></div>
+    <div class="result-cell"><div class="val" id="res-reading">0%</div><div class="lbl">Reading</div></div>
+  </div>
+  <button class="restart-btn" onclick="location.reload()">Retake Test</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// QUESTION BANK
+// ═══════════════════════════════════════════════
+const questions = [
+
+// ── SECTION 1: VOCABULARY – Real or Fake? (Q1–20, 10 sec each) ──
+{id:1,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "APPLE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Apple" is a very common English word — a fruit.'},
+
+{id:2,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "FLIBBERTY" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Flibberty" does not exist in English.'},
+
+{id:3,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "KITCHEN" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Kitchen" is the room where you cook food.'},
+
+{id:4,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "SNORBLAX" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Snorblax" is an invented word — it does not exist.'},
+
+{id:5,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "UMBRELLA" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Umbrella" is the object you use when it rains.'},
+
+{id:6,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "GLOOPIFY" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Gloopify" is not a real English word.'},
+
+{id:7,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "NEIGHBOUR" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Neighbour" (also spelled "neighbor") means someone who lives near you.'},
+
+{id:8,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "TRUMBLE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Trumble" is not a standard English word. "Tremble" (to shake) is real.'},
+
+{id:9,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "COMFORTABLE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Comfortable" means feeling relaxed and at ease.'},
+
+{id:10,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "BRONGULATE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Brongulate" is completely invented.'},
+
+{id:11,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "LIBRARY" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Library" is a place where you borrow books.'},
+
+{id:12,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "ZUMFOLD" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Zumfold" does not exist in the English language.'},
+
+{id:13,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "APPOINTMENT" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Appointment" means a fixed time to meet someone, e.g. a doctor\'s appointment.'},
+
+{id:14,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "CONFUZZLE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Confuzzle" is an internet slang joke combining "confused" and "puzzle", but it is not a real dictionary word.'},
+
+{id:15,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "TEMPERATURE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Temperature" measures how hot or cold something is.'},
+
+{id:16,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "EXPLENATE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Explenate" is not real. The correct word is "explain" or "explanation".'},
+
+{id:17,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "HOMEWORK" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Homework" is schoolwork that students do at home.'},
+
+{id:18,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "QUIZZIFY" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Quizzify" is not a standard dictionary word.'},
+
+{id:19,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "BICYCLE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:0, explanation:'"Bicycle" is a vehicle with two wheels that you ride by pedalling.'},
+
+{id:20,type:'vocab',time:10,section:'Vocabulary',
+ prompt:'Is "FLURPINATE" a real English word?',
+ options:['Yes, it is a real word','No, it is not a real word'],
+ correct:1, explanation:'"Flurpinate" is completely made up.'},
+
+// ── SECTION 2: GRAMMAR (Q21–45, 30 sec each) ──
+{id:21,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct sentence:',
+ options:['She go to school every day.','She goes to school every day.','She going to school every day.','She goed to school every day.'],
+ correct:1, explanation:'With "she/he/it" in the present simple, add -s: "She goes".'},
+
+{id:22,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which word completes the sentence correctly?\n"I _____ a cup of tea right now."',
+ options:['drink','drank','am drinking','drinks'],
+ correct:2, explanation:'"Right now" signals present continuous: "am drinking".'},
+
+{id:23,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct sentence:',
+ options:['There are a lot of furnitures in the room.','There is a lot of furniture in the room.','There are a lot of furniture in the room.','There is a lot of furnitures in the room.'],
+ correct:1, explanation:'"Furniture" is uncountable — no plural -s, use "is".'},
+
+{id:24,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which sentence is correct?',
+ options:['He didn\'t went to the party.','He didn\'t go to the party.','He doesn\'t went to the party.','He didn\'t goed to the party.'],
+ correct:1, explanation:'After "didn\'t" use the base verb: "go", not "went".'},
+
+{id:25,type:'grammar',time:30,section:'Grammar',
+ prompt:'Fill the gap: "Can you pass _____ salt, please?"',
+ options:['a','an','the','—'],
+ correct:2, explanation:'We use "the" for a specific object both speakers can see.'},
+
+{id:26,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct form:\n"Yesterday I _____ a great film."',
+ options:['watch','watched','am watching','have watch'],
+ correct:1, explanation:'"Yesterday" tells us to use the past simple: "watched".'},
+
+{id:27,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which sentence is grammatically correct?',
+ options:['They was at home all day.','They were at home all day.','They be at home all day.','They been at home all day.'],
+ correct:1, explanation:'"They" takes "were" in the past tense.'},
+
+{id:28,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the right comparative:\n"This bag is _____ than that one."',
+ options:['more heavy','heavier','heavyer','most heavy'],
+ correct:1, explanation:'Short adjectives (1 syllable) use -er: "heavier".'},
+
+{id:29,type:'grammar',time:30,section:'Grammar',
+ prompt:'Select the correct question form:',
+ options:['Where you live?','Where do you live?','Where does you live?','Where did you lives?'],
+ correct:1, explanation:'Present simple questions need "do": "Where do you live?"'},
+
+{id:30,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which word fits correctly?\n"I have _____ been to Paris."',
+ options:['never','ever','always','yet'],
+ correct:0, explanation:'"Never" with present perfect means not at any time in your life.'},
+
+{id:31,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct sentence:',
+ options:['She is more tall than her brother.','She is taller than her brother.','She is tallest than her brother.','She is most tall than her brother.'],
+ correct:1, explanation:'One-syllable adjectives use -er for comparatives: "taller than".'},
+
+{id:32,type:'grammar',time:30,section:'Grammar',
+ prompt:'"_____ you like some coffee?" — What is the correct word?',
+ options:['Do','Would','Will','Are'],
+ correct:1, explanation:'"Would you like…?" is the polite way to offer something.'},
+
+{id:33,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which sentence uses "some" correctly?',
+ options:['Can I have some water?','Can I have some waters?','Can I have a some water?','Can I have some a water?'],
+ correct:0, explanation:'"Some" is used with uncountable nouns like "water". No article needed.'},
+
+{id:34,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct form:\n"She _____ her keys yesterday."',
+ options:['lose','looses','lost','has lose'],
+ correct:2, explanation:'"Yesterday" requires past simple: "lost".'},
+
+{id:35,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which sentence is correct?',
+ options:['I am agree with you.','I agreeing with you.','I agree with you.','I agrees with you.'],
+ correct:2, explanation:'"Agree" is not used with "be": we say "I agree", not "I am agree".'},
+
+{id:36,type:'grammar',time:30,section:'Grammar',
+ prompt:'Select the correct preposition:\n"She arrived _____ Monday morning."',
+ options:['in','at','on','by'],
+ correct:2, explanation:'We use "on" with days: "on Monday morning".'},
+
+{id:37,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct future form:\n"We _____ a party next Saturday."',
+ options:['are having','have','had','will having'],
+ correct:0, explanation:'"Are having" (present continuous) is used for planned future events.'},
+
+{id:38,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which word correctly completes the sentence?\n"There is _____ milk in the fridge."',
+ options:['many','a few','any','much'],
+ correct:3, explanation:'"Much" is used with uncountable nouns like "milk".'},
+
+{id:39,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct sentence:',
+ options:['He has worked here since five years.','He has worked here for five years.','He worked here for five years ago.','He is working here since five years.'],
+ correct:1, explanation:'Use "for" + a period of time with present perfect: "for five years".'},
+
+{id:40,type:'grammar',time:30,section:'Grammar',
+ prompt:'"I _____ cooking when the phone rang." — Choose the correct verb form.',
+ options:['cook','cooked','was cooking','am cooking'],
+ correct:2, explanation:'Past continuous (was cooking) describes an action in progress when interrupted.'},
+
+{id:41,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which sentence is correct?',
+ options:['The news are bad today.','The news is bad today.','The news were bad today.','The news be bad today.'],
+ correct:1, explanation:'"News" is always singular in English: "The news IS".'},
+
+{id:42,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct passive form:\n"The letter _____ yesterday."',
+ options:['sent','was sent','is sent','sends'],
+ correct:1, explanation:'Past passive = was/were + past participle: "was sent".'},
+
+{id:43,type:'grammar',time:30,section:'Grammar',
+ prompt:'Select the right modal:\n"You _____ smoke in this building. It\'s forbidden."',
+ options:['mustn\'t','don\'t have to','shouldn\'t','needn\'t'],
+ correct:0, explanation:'"Mustn\'t" expresses prohibition — it is not allowed.'},
+
+{id:44,type:'grammar',time:30,section:'Grammar',
+ prompt:'Which is the correct indirect question?',
+ options:['Can you tell me where is the station?','Can you tell me where the station is?','Can you tell me where does the station is?','Can you tell me where the station be?'],
+ correct:1, explanation:'In indirect questions, the word order is: where + subject + verb.'},
+
+{id:45,type:'grammar',time:30,section:'Grammar',
+ prompt:'Choose the correct sentence:',
+ options:['If it will rain, I will stay home.','If it rains, I will stay home.','If it rained, I will stay home.','If it rain, I stay home.'],
+ correct:1, explanation:'Zero/first conditional: "If + present simple, will + base verb".'},
+
+// ── SECTION 3: READING COMPREHENSION (Q46–60, 95 sec each) ──
+{id:46,type:'reading',time:95,section:'Reading',
+ passage:'Maria woke up at 7 o\'clock. She made breakfast — toast and orange juice. After breakfast, she walked to the bus stop. The bus was late, so she arrived at the office at 9:15 instead of 9:00. Her boss was not happy.',
+ prompt:'Why did Maria arrive late to the office?',
+ options:['She woke up late.','The bus was late.','She had too much breakfast.','She went to the wrong office.'],
+ correct:1, explanation:'The text says "The bus was late, so she arrived at the office at 9:15".'},
+
+{id:47,type:'reading',time:95,section:'Reading',
+ passage:'Tom loves football. Every weekend he plays with his friends in the park. Last Saturday, it was raining heavily, so they couldn\'t play outside. Instead, they watched the football championship on TV at Tom\'s house.',
+ prompt:'What did Tom and his friends do last Saturday?',
+ options:['They played football in the rain.','They went to a football stadium.','They watched football on TV.','They stayed at home and slept.'],
+ correct:2, explanation:'The text says "they watched the football championship on TV at Tom\'s house".'},
+
+{id:48,type:'reading',time:95,section:'Reading',
+ passage:'The Green Café is a small restaurant in the city centre. It is open from Monday to Saturday, 8am to 8pm. They serve breakfast, lunch and dinner. On Sundays, the café is closed. Their most popular dish is the vegetable soup.',
+ prompt:'When is the Green Café closed?',
+ options:['Monday','Saturday evening','Sunday','Friday afternoon'],
+ correct:2, explanation:'"On Sundays, the café is closed."'},
+
+{id:49,type:'reading',time:95,section:'Reading',
+ passage:'Anna is studying medicine at university. She wants to be a doctor. She studies for six hours every day and reads many medical books. Her family is very proud of her. She will finish her studies in three years.',
+ prompt:'What is Anna\'s goal?',
+ options:['To write medical books.','To become a university professor.','To become a doctor.','To open a hospital.'],
+ correct:2, explanation:'"She wants to be a doctor."'},
+
+{id:50,type:'reading',time:95,section:'Reading',
+ passage:'Peter went to the supermarket. He needed milk, bread, and eggs. He found milk and bread easily, but there were no eggs left. He asked a shop assistant, who said the eggs would arrive tomorrow morning.',
+ prompt:'What was the problem at the supermarket?',
+ options:['The supermarket was closed.','There was no milk.','There were no eggs.','Peter forgot his shopping list.'],
+ correct:2, explanation:'"There were no eggs left."'},
+
+{id:51,type:'reading',time:95,section:'Reading',
+ passage:'The weather in London is often cloudy and cool. It rains a lot, especially in autumn and winter. Summers are usually mild and sunny, but not very hot. Many tourists visit London in the summer.',
+ prompt:'When do most tourists visit London?',
+ options:['In winter, for the cold weather.','In summer, when it is mild and sunny.','In autumn, for the rain.','In spring, for the flowers.'],
+ correct:1, explanation:'"Many tourists visit London in the summer."'},
+
+{id:52,type:'reading',time:95,section:'Reading',
+ passage:'Jane bought a new phone last month. It was expensive, but she needed it for work. She uses it to send emails, attend video meetings, and organise her schedule. She is very happy with it.',
+ prompt:'Why did Jane buy a new phone?',
+ options:['To play games.','To take photos.','Because she needed it for work.','Because her old phone was lost.'],
+ correct:2, explanation:'"She needed it for work."'},
+
+{id:53,type:'reading',time:95,section:'Reading',
+ passage:'David is a teacher. He teaches English at a secondary school. He loves his job because he enjoys helping students learn. He has 25 students in his class. His lessons usually last 50 minutes.',
+ prompt:'How long are David\'s lessons?',
+ options:['25 minutes','1 hour','50 minutes','45 minutes'],
+ correct:2, explanation:'"His lessons usually last 50 minutes."'},
+
+{id:54,type:'reading',time:95,section:'Reading',
+ passage:'The train from Paris to London takes about two and a half hours through the Channel Tunnel. Tickets must be bought in advance. You should arrive at the station at least 30 minutes before departure.',
+ prompt:'How long does the journey from Paris to London take?',
+ options:['About 1 hour.','About 30 minutes.','About 2.5 hours.','About 4 hours.'],
+ correct:2, explanation:'"The train from Paris to London takes about two and a half hours."'},
+
+{id:55,type:'reading',time:95,section:'Reading',
+ passage:'Sophie is learning to cook. Every Sunday, she tries a new recipe. Last Sunday she made pasta with tomato sauce. It was her first time, and it was delicious. Her family ate everything.',
+ prompt:'What did Sophie cook last Sunday?',
+ options:['Pizza','Tomato soup','Pasta with tomato sauce','A salad'],
+ correct:2, explanation:'"Last Sunday she made pasta with tomato sauce."'},
+
+{id:56,type:'reading',time:95,section:'Reading',
+ passage:'The library is on Park Street, next to the post office. It opens at 9am and closes at 6pm from Monday to Friday. On weekends, it closes at 2pm. You need a library card to borrow books.',
+ prompt:'What do you need to borrow books from the library?',
+ options:['A student ID','A library card','Your passport','A credit card'],
+ correct:1, explanation:'"You need a library card to borrow books."'},
+
+{id:57,type:'reading',time:95,section:'Reading',
+ passage:'Ben couldn\'t sleep last night because he was worried about his exam. He tried to read a book, drank warm milk, and even counted sheep, but nothing helped. He finally fell asleep at 3am.',
+ prompt:'Why couldn\'t Ben sleep?',
+ options:['He was not tired.','He was worried about his exam.','He drank too much coffee.','His room was too hot.'],
+ correct:1, explanation:'"He was worried about his exam."'},
+
+{id:58,type:'reading',time:95,section:'Reading',
+ passage:'Every year, thousands of people run the London Marathon. Runners come from all over the world. The race is 42 kilometres long. Participants train for months before the event. Many runners raise money for charity.',
+ prompt:'How long is the London Marathon?',
+ options:['26 kilometres','42 kilometres','50 kilometres','30 kilometres'],
+ correct:1, explanation:'"The race is 42 kilometres long."'},
+
+{id:59,type:'reading',time:95,section:'Reading',
+ passage:'Lisa works at a travel agency. She helps people plan their holidays. She recommends hotels, books flights, and suggests things to do in different cities. She loves her job because she is also interested in travelling.',
+ prompt:'What is Lisa\'s job?',
+ options:['She is a hotel manager.','She works at a travel agency.','She is a tour guide.','She works at an airport.'],
+ correct:1, explanation:'"Lisa works at a travel agency."'},
+
+{id:60,type:'reading',time:95,section:'Reading',
+ passage:'In many countries, people celebrate New Year on the 1st of January. In China, New Year is celebrated in January or February, depending on the lunar calendar. Families come together, eat special food, and watch fireworks.',
+ prompt:'When is Chinese New Year celebrated?',
+ options:['Always on 1st January.','In June or July.','In January or February, based on the lunar calendar.','In December only.'],
+ correct:2, explanation:'"In China, New Year is celebrated in January or February, depending on the lunar calendar."'},
+
+// ── SECTION 4: LISTENING (Q61–85, 60 sec each) ──
+// Since we cannot play real audio, we simulate with a "transcript" revealed approach
+{id:61,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hello! My name is Sarah. I work as a nurse at City Hospital. I start work at 8 in the morning and finish at 4 in the afternoon."',
+ prompt:'What time does Sarah finish work?',
+ options:['At 8 in the morning.','At 4 in the afternoon.','At 6 in the evening.','At noon.'],
+ correct:1, explanation:'Sarah says "I finish at 4 in the afternoon."'},
+
+{id:62,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "The weather tomorrow will be cold and cloudy. There is a chance of snow in the north. In the south, expect some rain. Temperatures will be between 2 and 5 degrees."',
+ prompt:'What is the temperature range tomorrow?',
+ options:['Between 5 and 10 degrees.','Between 0 and 2 degrees.','Between 2 and 5 degrees.','Between 10 and 15 degrees.'],
+ correct:2, explanation:'"Temperatures will be between 2 and 5 degrees."'},
+
+{id:63,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Thank you for calling City Bookstore. We are open Monday to Friday from 9am to 7pm. On Saturdays we close at 5pm. We are closed on Sundays. Press 1 to hear our bestsellers."',
+ prompt:'What time does the bookstore close on Saturdays?',
+ options:['At 7pm.','At 9pm.','At 5pm.','At 3pm.'],
+ correct:2, explanation:'"On Saturdays we close at 5pm."'},
+
+{id:64,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hi Emma! It\'s Michael. I\'m calling about our dinner plans on Friday. Can we change the time from 7pm to 8pm? My meeting is running late. Please call me back. Thanks!"',
+ prompt:'Why is Michael calling Emma?',
+ options:['To cancel dinner plans.','To change the dinner time.','To confirm the restaurant.','To ask for directions.'],
+ correct:1, explanation:'Michael wants to change the time from 7pm to 8pm.'},
+
+{id:65,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Attention passengers: the train to Edinburgh, departing from platform 3, will be delayed by approximately 20 minutes. We apologise for any inconvenience caused."',
+ prompt:'How long will the train be delayed?',
+ options:['10 minutes.','30 minutes.','20 minutes.','1 hour.'],
+ correct:2, explanation:'"Delayed by approximately 20 minutes."'},
+
+{id:66,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Welcome to the fitness centre. Our pool is open every day from 6am to 10pm. The gym is open 24 hours. Personal training sessions can be booked at reception."',
+ prompt:'When is the pool open?',
+ options:['24 hours a day.','From 6am to 10pm every day.','Only on weekdays.','From 8am to 8pm.'],
+ correct:1, explanation:'"Our pool is open every day from 6am to 10pm."'},
+
+{id:67,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Good morning. Today\'s special in the café is chicken soup with bread for £4.50. We also have a vegetarian pasta for £5. All meals include a free glass of water."',
+ prompt:'How much does the chicken soup with bread cost?',
+ options:['£5.00','£3.50','£4.50','£6.00'],
+ correct:2, explanation:'"Chicken soup with bread for £4.50."'},
+
+{id:68,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hello, this is Doctor Brown\'s office. I\'m calling to remind you that your appointment is on Thursday at 2:30pm. Please arrive 10 minutes early. Call us if you need to reschedule."',
+ prompt:'What time is the appointment?',
+ options:['At 2:00pm on Thursday.','At 2:30pm on Thursday.','At 3:00pm on Friday.','At 2:30pm on Tuesday.'],
+ correct:1, explanation:'"Your appointment is on Thursday at 2:30pm."'},
+
+{id:69,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hi everyone! My name is Carlos and I\'m from Spain. I study computer science. In my free time, I play the guitar and go cycling. I live with two other students in a flat near the university."',
+ prompt:'What does Carlos study?',
+ options:['Music','Engineering','Computer science','Languages'],
+ correct:2, explanation:'"I study computer science."'},
+
+{id:70,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "The museum is free to enter on the first Sunday of every month. Special exhibitions cost £8 for adults and £4 for children. Audio guides are available in 12 languages."',
+ prompt:'When can you enter the museum for free?',
+ options:['Every Sunday.','On the first Saturday of the month.','On the first Sunday of every month.','Every day before 10am.'],
+ correct:2, explanation:'"The museum is free to enter on the first Sunday of every month."'},
+
+{id:71,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "I went to the market this morning. I bought some tomatoes, two kilos of potatoes, a bag of apples, and some cheese. I spent about twelve euros in total."',
+ prompt:'How much did the speaker spend at the market?',
+ options:['About £10.','About twelve euros.','About twenty euros.','About five pounds.'],
+ correct:1, explanation:'"I spent about twelve euros in total."'},
+
+{id:72,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "This is your pilot speaking. We are now flying at 35,000 feet. Our estimated arrival time in New York is 6:45pm local time. The weather in New York is partly cloudy with a temperature of 18 degrees."',
+ prompt:'What is the temperature in New York?',
+ options:['35 degrees.','25 degrees.','18 degrees.','12 degrees.'],
+ correct:2, explanation:'"The weather in New York... temperature of 18 degrees."'},
+
+{id:73,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hi! Do you want to go to the cinema tonight? There is a new comedy film starting at 7pm. After the film, we could get pizza. Let me know if you\'re free!"',
+ prompt:'What does the speaker suggest doing after the film?',
+ options:['Going to a restaurant for dinner.','Getting pizza.','Going bowling.','Going home.'],
+ correct:1, explanation:'"After the film, we could get pizza."'},
+
+{id:74,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Lost property announcement: A blue backpack was found near the exit of platform 2. The bag contains a laptop and some books. Please collect it from the information desk."',
+ prompt:'Where can you collect the lost backpack?',
+ options:['At platform 2.','At the exit.','At the information desk.','At the ticket office.'],
+ correct:2, explanation:'"Please collect it from the information desk."'},
+
+{id:75,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Welcome to English Plus Online School. We offer courses at beginner, intermediate, and advanced levels. Each course has 30 lessons. Students can study at their own pace. Registration is now open."',
+ prompt:'How many lessons does each course have?',
+ options:['20 lessons.','25 lessons.','30 lessons.','40 lessons.'],
+ correct:2, explanation:'"Each course has 30 lessons."'},
+
+{id:76,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Good afternoon. The swimming competition starts at 3pm in the main pool. Spectators should be seated by 2:45pm. Photography is not permitted during the competition."',
+ prompt:'When should spectators be seated?',
+ options:['At 3pm.','By 2:45pm.','By 2:30pm.','At 3:15pm.'],
+ correct:1, explanation:'"Spectators should be seated by 2:45pm."'},
+
+{id:77,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hi, I\'m calling about the job advertisement. I have five years of experience as a chef, and I speak English and French. I would like to arrange an interview. My phone number is 07700 900123."',
+ prompt:'How many languages does the caller speak?',
+ options:['One — English only.','Two — English and French.','Three — English, French and Spanish.','The caller does not mention languages.'],
+ correct:1, explanation:'"I speak English and French."'},
+
+{id:78,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Today\'s talk is about healthy eating. Doctors recommend eating at least five portions of fruit and vegetables every day. You should also drink about two litres of water daily."',
+ prompt:'How many portions of fruit and vegetables should you eat every day?',
+ options:['At least three.','At least five.','At least seven.','At least two.'],
+ correct:1, explanation:'"Eating at least five portions of fruit and vegetables every day."'},
+
+{id:79,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "This message is for guests of room 204. Your laundry is ready and can be collected from reception. Please bring your room key. The laundry service is available until 8pm."',
+ prompt:'What does the guest need to bring to collect their laundry?',
+ options:['Their passport.','Their credit card.','Their room key.','Their laundry receipt.'],
+ correct:2, explanation:'"Please bring your room key."'},
+
+{id:80,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Hi Anna! Are you coming to Jack\'s birthday party on Saturday? It starts at 6pm at his house. Please bring something to eat or drink. It\'s a surprise, so don\'t tell him!"',
+ prompt:'What kind of party is it?',
+ options:['A graduation party.','A work party.','A surprise birthday party.','A welcome party.'],
+ correct:2, explanation:'"It\'s a surprise, so don\'t tell him!" — it\'s a surprise birthday party.'},
+
+{id:81,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "To make a good cup of tea, first boil the water. Then put a teabag in your cup. Pour the hot water over the teabag and wait three minutes. Remove the teabag and add milk if you like."',
+ prompt:'How long should you wait after pouring the water?',
+ options:['One minute.','Five minutes.','Three minutes.','Ten minutes.'],
+ correct:2, explanation:'"Wait three minutes."'},
+
+{id:82,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Our new language school opened last month. We teach Spanish, French, and Italian. Classes are held on Tuesday and Thursday evenings. The first lesson is free for new students."',
+ prompt:'On which days are classes held?',
+ options:['Monday and Wednesday.','Tuesday and Thursday.','Every weekday evening.','Saturday and Sunday.'],
+ correct:1, explanation:'"Classes are held on Tuesday and Thursday evenings."'},
+
+{id:83,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "This is a reminder that the school sports day will be held on the 15th of June. Students should wear comfortable clothes. Parents are welcome to attend. The event starts at 10am."',
+ prompt:'What date is the school sports day?',
+ options:['The 5th of June.','The 15th of July.','The 15th of June.','The 10th of June.'],
+ correct:2, explanation:'"Sports day will be held on the 15th of June."'},
+
+{id:84,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Excuse me. Could you help me? I\'m looking for the nearest pharmacy. I need to buy some medicine. Is there one near here?"',
+ prompt:'What is the speaker looking for?',
+ options:['A hospital.','A doctor\'s office.','A pharmacy.','A supermarket.'],
+ correct:2, explanation:'"I\'m looking for the nearest pharmacy."'},
+
+{id:85,type:'listening',time:60,section:'Listening',
+ audio:'[Audio transcript] "Good evening. Tonight\'s documentary is about ocean life. We will explore the deep sea and discover animals that live where no sunlight reaches. The programme lasts 90 minutes."',
+ prompt:'What is tonight\'s documentary about?',
+ options:['Mountain wildlife.','Space exploration.','Ocean life.','Rainforests.'],
+ correct:2, explanation:'"Tonight\'s documentary is about ocean life."'},
+
+// ── SECTION 5: READING+ (Q86–95, 150 sec each) ──
+{id:86,type:'reading_long',time:150,section:'Reading+',
+ passage:'Most people need between seven and nine hours of sleep each night. Getting enough sleep is very important for your health. When you sleep, your body repairs itself and your brain stores new information. People who don\'t sleep enough often feel tired, have trouble concentrating, and may become ill more easily. Experts say that going to bed at the same time every night helps the body develop a regular sleep pattern. Avoiding screens such as phones and computers before bed can also improve sleep quality.',
+ prompt:'According to the text, what helps the body develop a regular sleep pattern?',
+ options:['Exercising late at night.','Going to bed at the same time every night.','Watching TV before sleeping.','Eating a big meal before bed.'],
+ correct:1, explanation:'"Going to bed at the same time every night helps the body develop a regular sleep pattern."'},
+
+{id:87,type:'reading_long',time:150,section:'Reading+',
+ passage:'Volunteering is when you give your time and skills to help others without being paid. Many people volunteer at hospitals, schools, or community centres. Volunteering has many benefits: it helps others, but it also helps you. You can learn new skills, meet new people, and feel good about yourself. Studies show that people who volunteer regularly are happier and feel less lonely. Even a few hours a week can make a big difference.',
+ prompt:'According to the text, which of the following is NOT a benefit of volunteering?',
+ options:['Learning new skills.','Meeting new people.','Feeling good about yourself.','Earning a good salary.'],
+ correct:3, explanation:'The text says volunteering is "without being paid" — so earning a salary is not a benefit mentioned.'},
+
+{id:88,type:'reading_long',time:150,section:'Reading+',
+ passage:'The Mediterranean diet is popular around the world because it is both tasty and healthy. It includes plenty of vegetables, fruit, fish, and olive oil. Red meat is eaten rarely. People who follow this diet usually drink water or herbal tea rather than sugary drinks. Research shows that this diet can reduce the risk of heart disease and diabetes. Many doctors recommend it to their patients.',
+ prompt:'What does the Mediterranean diet mainly include?',
+ options:['Red meat, butter, and sugar.','Vegetables, fruit, fish, and olive oil.','Fast food and fizzy drinks.','Dairy products and white bread.'],
+ correct:1, explanation:'"It includes plenty of vegetables, fruit, fish, and olive oil."'},
+
+{id:89,type:'reading_long',time:150,section:'Reading+',
+ passage:'Social media has become a large part of daily life for many people. Platforms like Instagram, Facebook, and TikTok allow people to share photos, videos, and opinions. While social media can help people stay connected with friends and family, experts warn that spending too much time on it can be harmful. Some people compare themselves to others and feel bad about their own lives. It is important to take breaks from social media and spend time offline.',
+ prompt:'What problem does the text say social media can cause?',
+ options:['It makes people more creative.','People can feel bad when comparing themselves to others.','It is too expensive.','It uses too much electricity.'],
+ correct:1, explanation:'"Some people compare themselves to others and feel bad about their own lives."'},
+
+{id:90,type:'reading_long',time:150,section:'Reading+',
+ passage:'Recycling is one of the easiest ways to help the environment. By recycling paper, glass, plastic, and metal, we reduce the amount of waste that goes to landfill sites. This saves energy and protects natural resources. In many cities, people sort their rubbish into different bins for different materials. However, recycling alone is not enough — we also need to reduce the amount we consume and reuse items where possible.',
+ prompt:'According to the text, what happens when we recycle?',
+ options:['We create more rubbish.','We increase energy use.','We reduce waste going to landfill and save energy.','We make recycled items more expensive.'],
+ correct:2, explanation:'"Recycling... reduces waste that goes to landfill sites. This saves energy."'},
+
+{id:91,type:'reading_long',time:150,section:'Reading+',
+ passage:'Coffee is one of the most popular drinks in the world. It is made from roasted coffee beans, which grow in tropical countries such as Brazil, Colombia, and Ethiopia. Coffee contains caffeine, which gives people energy and helps them feel more awake. However, drinking too much coffee can cause problems like a fast heartbeat or difficulty sleeping. Most doctors suggest drinking no more than four cups per day.',
+ prompt:'What does caffeine do, according to the text?',
+ options:['It helps people sleep better.','It gives people energy and helps them feel more awake.','It makes coffee taste bitter.','It grows in tropical countries.'],
+ correct:1, explanation:'"Coffee contains caffeine, which gives people energy and helps them feel more awake."'},
+
+{id:92,type:'reading_long',time:150,section:'Reading+',
+ passage:'Electric cars use electricity instead of petrol or diesel. They produce no direct air pollution and are quieter than traditional cars. The number of electric cars is growing every year because people are becoming more aware of climate change. One challenge is that electric cars need to be charged regularly, and in some areas there are not enough charging stations. Governments are investing money to build more charging infrastructure.',
+ prompt:'What is one challenge with electric cars?',
+ options:['They are too loud.','They use too much petrol.','There are not enough charging stations in some areas.','They are slower than traditional cars.'],
+ correct:2, explanation:'"In some areas there are not enough charging stations."'},
+
+{id:93,type:'reading_long',time:150,section:'Reading+',
+ passage:'The Olympic Games are the world\'s largest international sports competition. They take place every four years and feature athletes from over 200 countries. The Summer Olympics include sports such as swimming, athletics, and gymnastics. The Winter Olympics include skiing, ice skating, and snowboarding. The first modern Olympic Games were held in Athens, Greece, in 1896. The Games aim to promote peace and friendship among nations.',
+ prompt:'When were the first modern Olympic Games held?',
+ options:['In London in 1900.','In Paris in 1900.','In Athens in 1896.','In Berlin in 1936.'],
+ correct:2, explanation:'"The first modern Olympic Games were held in Athens, Greece, in 1896."'},
+
+{id:94,type:'reading_long',time:150,section:'Reading+',
+ passage:'Urban farming is the practice of growing food in cities. It can take many forms: rooftop gardens, community allotments, or vertical farms inside buildings. Urban farming helps city residents have access to fresh vegetables and fruit. It also reduces the distance food has to travel from farm to table, which lowers carbon emissions. Some cities in Europe and Asia are investing heavily in urban farming projects.',
+ prompt:'What is one environmental benefit of urban farming?',
+ options:['It creates more city traffic.','It reduces carbon emissions by shortening the distance food travels.','It makes vegetables more expensive.','It only works in cold climates.'],
+ correct:1, explanation:'"Reduces the distance food has to travel... which lowers carbon emissions."'},
+
+{id:95,type:'reading_long',time:150,section:'Reading+',
+ passage:'Learning a second language has many benefits. Research shows that bilingual people — those who speak two languages — often have better memory and problem-solving skills. They can also switch between tasks more easily than people who speak only one language. Learning a language is easier when you are young, but adults can also learn successfully with regular practice. Using the language in real conversations is one of the most effective ways to improve quickly.',
+ prompt:'According to the text, what is the most effective way to improve a language?',
+ options:['Reading grammar books every day.','Watching films without subtitles.','Using the language in real conversations.','Memorising vocabulary lists.'],
+ correct:2, explanation:'"Using the language in real conversations is one of the most effective ways to improve quickly."'},
+
+// ── SECTION 6: LOGICAL WRITING (Q96–100) ──
+{id:96,type:'writing',time:0,section:'Writing',
+ taskType:'formal',
+ prompt:'Write a short formal email (4–6 sentences) to your English teacher, Mr. Thompson, asking for an extension on your homework assignment. Give a reason.',
+ placeholder:'Dear Mr. Thompson,\n\nI am writing to request...',
+ tip:'Use formal language: "Dear Mr. ...", "I am writing to...", "I would be grateful if...", "Yours sincerely".'},
+
+{id:97,type:'writing',time:0,section:'Writing',
+ taskType:'informal',
+ prompt:'Write a short informal message (4–6 sentences) to your friend Sarah, inviting her to a birthday party at your house on Saturday at 7pm. Tell her what to bring.',
+ placeholder:'Hi Sarah!\n\nGuess what?...',
+ tip:'Use informal language: "Hey!", "Can\'t wait to see you!", "It\'s going to be so fun!", contractions (I\'m, don\'t, we\'re).'},
+
+{id:98,type:'writing',time:0,section:'Writing',
+ taskType:'problem',
+ prompt:'You stayed at a hotel last week. The room was dirty, the air conditioning was broken, and the staff were rude. Write a short formal complaint letter (5–7 sentences) to the hotel manager.',
+ placeholder:'Dear Hotel Manager,\n\nI am writing to complain about...',
+ tip:'State the problem clearly. Use: "I am writing to complain about...", "I was extremely disappointed...", "I would appreciate a refund/apology..."'},
+
+{id:99,type:'writing',time:0,section:'Writing',
+ taskType:'informal',
+ prompt:'Your friend James just passed his driving test! Write him a short informal congratulations message (4–5 sentences). Ask him a question about his plans now that he can drive.',
+ placeholder:'Hey James!\n\nI just heard the amazing news...',
+ tip:'Use exclamations, positive words: "Congratulations!", "So proud of you!", "Amazing news!", "Can\'t believe it!"'},
+
+{id:100,type:'writing',time:0,section:'Writing',
+ taskType:'formal',
+ prompt:'Write a short formal letter (5–7 sentences) applying for a part-time job as a shop assistant. Mention your relevant experience and why you want the job.',
+ placeholder:'Dear Hiring Manager,\n\nI am writing to apply for...',
+ tip:'Include: your skills/experience, why you want this job, availability. End with "I look forward to hearing from you." / "Yours sincerely."'},
+];
+
+// ═══════════════════════════════════════════════
+// EXAM STATE
+// ═══════════════════════════════════════════════
+let currentQ = 0;
+let score = 0;
+let timerInterval = null;
+let timeLeft = 0;
+let totalTime = 0;
+let answered = false;
+let results = {correct:0, wrong:0, skipped:0, vocab:[], grammar:[], reading:[], listening:[], writing:[]};
+
+function startExam() {
+  document.getElementById('intro-screen').style.display = 'none';
+  const es = document.getElementById('exam-screen');
+  es.style.display = 'flex';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = q.id;
+  document.getElementById('section-label').textContent = q.section;
+  
+  const card = document.getElementById('question-card');
+  card.innerHTML = '';
+
+  // Type tag
+  const tag = document.createElement('div');
+  tag.className = 'q-type-tag';
+  tag.textContent = getSectionDesc(q);
+  card.appendChild(tag);
+
+  // Build content based on type
+  if (q.type === 'reading' || q.type === 'reading_long') {
+    const pass = document.createElement('div');
+    pass.className = 'reading-passage';
+    pass.textContent = q.passage;
+    card.appendChild(pass);
+  }
+
+  if (q.type === 'listening') {
+    const wrap = document.createElement('div');
+    wrap.className = 'audio-player-wrap';
+    wrap.innerHTML = `
+      <div class="audio-player-custom">
+        <button class="play-btn" onclick="toggleAudio(this)">▶</button>
+        <div class="audio-label" id="audio-label-${q.id}">Press play to listen</div>
+      </div>
+      <div class="audio-note">🔊 Click ▶ to reveal the audio transcript for this exercise.</div>
+    `;
+    card.appendChild(wrap);
+  }
+
+  if (q.type === 'writing') {
+    const tipBox = document.createElement('div');
+    tipBox.className = 'writing-task';
+    tipBox.innerHTML = `<strong>💡 Language tip:</strong> ${q.tip}`;
+    card.appendChild(tipBox);
+  }
+
+  const prompt = document.createElement('div');
+  prompt.className = 'q-prompt';
+  prompt.style.whiteSpace = 'pre-line';
+  prompt.textContent = q.prompt;
+  card.appendChild(prompt);
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback-box';
+  fb.id = 'feedback-box';
+  card.appendChild(fb);
+
+  // Answer area
+  if (q.type === 'writing') {
+    const wrap = document.createElement('div');
+    wrap.className = 'text-input-wrap';
+    const ta = document.createElement('textarea');
+    ta.className = 'text-input';
+    ta.placeholder = q.placeholder;
+    ta.rows = 8;
+    ta.id = 'writing-input';
+    wrap.appendChild(ta);
+    card.appendChild(wrap);
+  } else if (q.options) {
+    const grid = document.createElement('div');
+    grid.className = 'options-grid';
+    const letters = ['A','B','C','D'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="opt-letter">${letters[i]}</span>${opt}`;
+      btn.onclick = () => selectAnswer(i, btn, q);
+      grid.appendChild(btn);
+    });
+    card.appendChild(grid);
+  }
+
+  // Nav row
+  const nav = document.createElement('div');
+  nav.className = 'nav-row';
+  const skipBtn = document.createElement('button');
+  skipBtn.className = 'nav-btn';
+  skipBtn.textContent = q.type === 'writing' ? 'Submit & Continue' : 'Skip';
+  skipBtn.id = 'skip-btn';
+  skipBtn.onclick = () => nextQuestion(true);
+  nav.appendChild(skipBtn);
+  card.appendChild(nav);
+
+  // Timer
+  if (q.time > 0) {
+    startTimer(q.time);
+  } else {
+    document.getElementById('timer-display').textContent = '—';
+    document.getElementById('timer-bar').style.width = '100%';
+  }
+}
+
+function getSectionDesc(q) {
+  const map = {
+    vocab: 'Vocabulary — Real or Fake?',
+    grammar: 'Grammar',
+    reading: 'Reading Comprehension',
+    reading_long: 'Extended Reading',
+    listening: 'Listening',
+    writing: `Writing — ${q.taskType === 'formal' ? 'Formal' : q.taskType === 'informal' ? 'Informal' : 'Problem-Solving'}`
+  };
+  return map[q.type] || q.type;
+}
+
+function toggleAudio(btn) {
+  const q = questions[currentQ];
+  const label = document.getElementById(`audio-label-${q.id}`);
+  if (btn.textContent === '▶') {
+    btn.textContent = '⏸';
+    label.innerHTML = `<em>${q.audio}</em>`;
+  } else {
+    btn.textContent = '▶';
+  }
+}
+
+let selectedIdx = -1;
+function selectAnswer(idx, btn, q) {
+  if (answered) return;
+  answered = true;
+  selectedIdx = idx;
+  clearInterval(timerInterval);
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => { b.disabled = true; });
+
+  const isCorrect = idx === q.correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    allBtns[q.correct].classList.add('correct');
+  }
+
+  const fb = document.getElementById('feedback-box');
+  if (isCorrect) {
+    fb.className = 'feedback-box correct';
+    fb.textContent = '✓ Correct! ' + q.explanation;
+    score++;
+    results.correct++;
+    trackSection(q, true);
+  } else {
+    fb.className = 'feedback-box wrong';
+    fb.textContent = '✗ Incorrect. ' + q.explanation;
+    results.wrong++;
+    trackSection(q, false);
+  }
+
+  const skipBtn = document.getElementById('skip-btn');
+  skipBtn.textContent = 'Next';
+  skipBtn.className = 'nav-btn primary';
+}
+
+function trackSection(q, isCorrect) {
+  const v = isCorrect ? 1 : 0;
+  if (q.type === 'vocab') results.vocab.push(v);
+  else if (q.type === 'grammar') results.grammar.push(v);
+  else if (q.type === 'reading' || q.type === 'reading_long') results.reading.push(v);
+  else if (q.type === 'listening') results.listening.push(v);
+  else results.writing.push(1);
+}
+
+function nextQuestion(skipped) {
+  if (skipped && !answered) {
+    const q = questions[currentQ];
+    if (q.type === 'writing') {
+      const val = document.getElementById('writing-input')?.value?.trim();
+      if (!val) { results.skipped++; } else { results.writing.push(1); score++; results.correct++; }
+    } else {
+      results.skipped++;
+      trackSection(q, false);
+    }
+    clearInterval(timerInterval);
+  }
+
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+    return;
+  }
+  renderQuestion();
+}
+
+function startTimer(seconds) {
+  clearInterval(timerInterval);
+  timeLeft = seconds;
+  totalTime = seconds;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) {
+        autoTimeout();
+      }
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const pct = (timeLeft / totalTime) * 100;
+  const bar = document.getElementById('timer-bar');
+  const disp = document.getElementById('timer-display');
+  bar.style.width = pct + '%';
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  disp.textContent = mins + ':' + String(secs).padStart(2,'0');
+  bar.className = '';
+  if (pct < 20) bar.classList.add('danger');
+  else if (pct < 40) bar.classList.add('warn');
+}
+
+function autoTimeout() {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  results.skipped++;
+  trackSection(q, false);
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+  if (q.correct !== undefined && allBtns[q.correct]) allBtns[q.correct].classList.add('correct');
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box wrong';
+  fb.textContent = '⏱ Time\'s up! ' + (q.explanation || '');
+
+  const skipBtn = document.getElementById('skip-btn');
+  skipBtn.textContent = 'Next';
+  skipBtn.className = 'nav-btn primary';
+}
+
+function pct(arr) {
+  if (!arr.length) return 'N/A';
+  return Math.round((arr.reduce((a,b)=>a+b,0)/arr.length)*100) + '%';
+}
+
+function showResults() {
+  clearInterval(timerInterval);
+  document.getElementById('exam-screen').style.display = 'none';
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'flex';
+
+  const total = questions.length;
+  const scorePct = Math.round((score / total) * 100);
+  document.getElementById('result-pct').textContent = scorePct + '%';
+  document.getElementById('res-correct').textContent = results.correct;
+  document.getElementById('res-wrong').textContent = results.wrong;
+  document.getElementById('res-skipped').textContent = results.skipped;
+  document.getElementById('res-vocab').textContent = pct(results.vocab);
+  document.getElementById('res-grammar').textContent = pct(results.grammar);
+  document.getElementById('res-reading').textContent = pct(results.reading);
+
+  let level, title;
+  if (scorePct >= 85) { level = 'Excellent A2 — approaching B1 level'; title = 'Outstanding Result!'; }
+  else if (scorePct >= 70) { level = 'Strong A2 — well-prepared'; title = 'Great Work!'; }
+  else if (scorePct >= 55) { level = 'Solid A2 — keep practising'; title = 'Good Effort!'; }
+  else if (scorePct >= 40) { level = 'Developing A2 — more practice needed'; title = 'Keep Going!'; }
+  else { level = 'Below A2 — focus on the basics'; title = 'Don\'t Give Up!'; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-level').textContent = level;
+
+  const ring = document.getElementById('result-ring');
+  ring.style.background = `conic-gradient(var(--blue) ${scorePct * 3.6}deg, rgba(255,255,255,0.08) 0deg)`;
+}
+</script>
+</body>
+</html>
